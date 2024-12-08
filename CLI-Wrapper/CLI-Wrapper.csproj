@@ -17,6 +17,7 @@
     <RepositoryUrl>https://github.com/ZacharyCarey/CLI-Wrapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Platforms>AnyCPU;x64</Platforms>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
