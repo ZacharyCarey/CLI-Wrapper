@@ -9,7 +9,7 @@
     <PackageProjectUrl>https://github.com/ZacharyCarey/CLI-Wrapper</PackageProjectUrl>
     <Company>$(Authors)</Company>
     <Authors>zcarey</Authors>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageTags>CLI;command;line;wrapper;command line;library;shell;async</PackageTags>
     <Description>Wraps System.Diagnotics.Process for easier use and capabilities.</Description>

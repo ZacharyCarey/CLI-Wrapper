@@ -143,6 +143,7 @@ namespace CLI_Wrapper {
         }
         #endregion
 
+        /// <inheritdoc cref="Run"/>
         public async Task<CliResult> RunAsync() {
             return await Task.Run(Run);
         }
@@ -177,11 +178,11 @@ namespace CLI_Wrapper {
                 process.BeginErrorReadLine();
             } catch (Exception e) when (e is Win32Exception || e is InvalidOperationException)
             {
-                CloseLog();
+                CloseLog(e);
                 return new(new FileNotFoundException("The system cannont file the specified file/command.", e), int.MinValue, StdOutput.ToList(), StdError.ToList());
             } catch (Exception e) {
                 // Process has already been disposed (unlikely) or running on Linux/Mac where Process isn't a supported feature (Core only???)
-                CloseLog();
+                CloseLog(e);
                 return new(e, int.MinValue, StdOutput.ToList(), StdError.ToList());
             }
 
@@ -189,25 +190,46 @@ namespace CLI_Wrapper {
             {
                 process.WaitForExit();
             } catch(SystemException e) {
+                CloseLog(e);
                 return new(new SystemException("Process has already exited", e), int.MinValue, StdOutput.ToList(), StdError.ToList());
             } catch(Exception e)
             {
+                CloseLog(e);
                 return new(e, int.MinValue, StdOutput.ToList(), StdError.ToList());
-            } finally
-            {
-                CloseLog();
             }
 
+            CloseLog(process.ExitCode);
             return new CliResult(null, process.ExitCode, StdOutput.ToList(), StdError.ToList());
         }
 
-        private void CloseLog() {
+        private void CloseLog(string exitMessage) {
             if (this.LogFile != null)
             {
-                this.LogFile.Flush();
-                this.LogFile.Close();
+                // Put these in seperate try/catch statements to try and get as much info into the log file
+                // as possible while closing, without throwing any errors into the main program.
+                try
+                {
+                    this.LogFile.WriteLine($"Process exited with {exitMessage}");
+                } catch (Exception) { }
+                try
+                {
+                    this.LogFile.Flush();
+                } catch (Exception) { }
+                try
+                {
+                    this.LogFile.Close();
+                } catch (Exception) { }
+
                 this.LogFile = null;
             }
+        }
+
+        private void CloseLog (Exception e) {
+            CloseLog($"exception: {e.Message}");
+        }
+
+        private void CloseLog(int exitCode) {
+            CloseLog($"exit code = {exitCode}");
         }
 
         private void ReceiveOutput(object sender, DataReceivedEventArgs e) {
